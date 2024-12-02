@@ -22,8 +22,8 @@ public class Main {
             map.put(key,occurence);
         }
         int sum = 0;
-        for (int i = 0; i < leftCodes.size(); i++) {
-            sum += leftCodes.get(i) * map.getOrDefault(leftCodes.get(i),0);
+        for (Integer leftCode : leftCodes) {
+            sum += leftCode * map.getOrDefault(leftCode, 0);
         }
         System.out.println(sum);
 //        for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
