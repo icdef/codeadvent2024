@@ -29,26 +29,14 @@ public class Main {
                     sum += Integer.parseInt(split[split.length/2]);
                 }
                 else {
-                    do {
-                        Map<String, Integer> visited = new HashMap<>();
-                        for (int i = 0; i < split.length; i++) {
-                            visited.put(split[i],i);
-                            Set<String> allowedSuccessors = map.get(split[i]);
-                            if (allowedSuccessors != null) {
-                                for (Map.Entry<String, Integer> entry: visited.entrySet()) {
-                                    // need to swap numbers
-                                    if (allowedSuccessors.contains(entry.getKey())) {
-                                        // index from number to swap with
-                                        Integer j = entry.getValue();
-                                        String temp = split[i];
-                                        split[i] = split[j];
-                                        split[j] = temp;
-                                        break;
-                                    }
-                                }
-                            }
+                    Arrays.sort(split,(o1, o2) -> {
+                        if (map.get(o1) != null && map.get(o1).contains(o2)) {
+                            return -1;
                         }
-                    } while(!isLegalOrder(split, map));
+                        if (map.get(o2) != null && map.get(o2).contains(o1))
+                            return 1;
+                        return 0;
+                    });
                     sum2+= Integer.parseInt(split[split.length/2]);
                 }
             }
