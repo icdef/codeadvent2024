@@ -3,7 +3,6 @@ package day6;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Main {
 
@@ -49,9 +48,12 @@ public class Main {
                     guard.y < 0 || guard.y >= field.size()) {
                 if (visited[oldGuard.y][oldGuard.x]) {
                     field.get(oldGuard.y)[oldGuard.x] = '+';
+//                    field.get(oldGuard.y)[oldGuard.x] = 'X';
                 } else {
                     field.get(oldGuard.y)[oldGuard.x] = guard.getMoveChar();
+//                    field.get(oldGuard.y)[oldGuard.x] = 'X';
                 }
+                field.get(startGuard.y)[startGuard.x] = '^';
                 drawField(field);
                 break;
             }
@@ -62,7 +64,8 @@ public class Main {
                 turned = true;
             } else {
                 if (visited[oldGuard.y][oldGuard.x]) {
-                    field.get(oldGuard.y)[oldGuard.x] = '+';
+//                    field.get(oldGuard.y)[oldGuard.x] = '+';
+                    field.get(oldGuard.y)[oldGuard.x] = 'X';
                 } else {
                     field.get(oldGuard.y)[oldGuard.x] = guard.getMoveChar();
 //                field.get(oldGuard.y)[oldGuard.x] = 'X';
@@ -83,7 +86,6 @@ public class Main {
                             ghost.y < 0 || ghost.y >= field.size()) {
                         break;
                     }
-
                     if (field.get(ghost.y)[ghost.x] == '#') {
                         ghost.y = oldGhostCopy.y;
                         ghost.x = oldGhostCopy.x;
@@ -114,12 +116,19 @@ public class Main {
 //            drawField(field);
 
         }
-
+        int count2 = 0;
+        for (char[] chars : field) {
+            for (char c : chars)
+                if (c == '#')
+                    count2++;
+        }
+        field.get(startGuard.y)[startGuard.x] = '^';
         for (Guard g : blockPositions) {
             field.get(g.y)[g.x] = 'O';
         }
         drawField(field);
-        System.out.println(count);
+
+        System.out.println(count2);
         System.out.println(new HashSet<>(blockPositions).size());
 
     }
