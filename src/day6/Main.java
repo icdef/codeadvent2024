@@ -2,10 +2,8 @@ package day6;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Main {
 
@@ -33,7 +31,10 @@ public class Main {
             }
         }
 
-        boolean[][] visited = new boolean[field.size()][field.size()];
+        boolean[][] visited = new boolean[field.size()][];
+        for (int i = 0; i < visited.length; i++) {
+            visited[i] = new boolean[field.get(i).length];
+        }
 
         long maxSteps = (long) field.size() * field.size();
         boolean turned;
@@ -72,15 +73,18 @@ public class Main {
                 field.get(guard.y)[guard.x] = guard.lookCorrectSide();
                 Guard ghost = new Guard(oldGuard.x, oldGuard.y, oldGuard.moveDirection);
                 Guard oldGhostCopy = new Guard(oldGuard.x, oldGuard.y, oldGuard.moveDirection);
+                char oldMoveSymbol = field.get(guard.y)[guard.x];
                 ghost.changeDirection();
                 ghost.move();
+                field.get(guard.y)[guard.x] = '#';
                 int steps = 0;
-                while (ghost.x != oldGuard.x || ghost.y != oldGuard.y) {
-                    if (steps > maxSteps)
-                        break;
+                while (steps <= maxSteps) {
+//                    if (steps > maxSteps)
+//                        break;
                     if (ghost.x < 0 || ghost.x >= field.getFirst().length ||
-                            ghost.y < 0 || ghost.y >= field.size())
+                            ghost.y < 0 || ghost.y >= field.size()) {
                         break;
+                    }
 
                     if (field.get(ghost.y)[ghost.x] == '#') {
                         ghost.y = oldGhostCopy.y;
@@ -91,20 +95,23 @@ public class Main {
                         oldGhostCopy.y = ghost.y;
                         oldGhostCopy.x = ghost.x;
                         oldGhostCopy.moveDirection = ghost.moveDirection;
+                        ghost.move();
+                        steps++;
                     }
-                    ghost.move();
-                    steps++;
-                }
 
-                if (ghost.x == oldGuard.x && ghost.y == oldGuard.y) {
+                }
+                field.get(guard.y)[guard.x] = oldMoveSymbol;
+
+                if (steps > maxSteps) {
                     if (!(guard.x == startGuard.x && guard.y == startGuard.y)) {
                         Guard blockPosition = new Guard(guard.x, guard.y, guard.moveDirection);
                         blockPositions.add(blockPosition);
                         count++;
                     }
                 }
+
             }
-            visited[oldGuard.y][oldGuard.x] = true;
+//            visited[oldGuard.y][oldGuard.x] = true;
 
 //            drawField(field);
 
@@ -115,6 +122,7 @@ public class Main {
         }
         drawField(field);
         System.out.println(count);
+        System.out.println(new HashSet<>(blockPositions).size());
 
     }
 
