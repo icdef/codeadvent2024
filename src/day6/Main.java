@@ -18,6 +18,7 @@ public class Main {
         }
         Guard guard = new Guard();
         Guard oldGuard = new Guard();
+        Guard startGuard = new Guard();
         // get guard position
         for (int i = 0; i < field.size(); i++) {
             for (int j = 0; j < field.get(i).length; j++) {
@@ -26,17 +27,18 @@ public class Main {
                     guard.y = i;
                     oldGuard.y = i;
                     oldGuard.x = j;
+                    startGuard.x = j;
+                    startGuard.y = i;
                 }
             }
         }
+
         boolean[][] visited = new boolean[field.size()][field.size()];
-        char[][] visitedCopy = new char[field.size()][field.size()];
-        for (char[] chars: visitedCopy) {
-            Arrays.fill(chars, '.');
-        }
-        boolean turned = false;
+
+        long maxSteps = (long) field.size() * field.size();
+        boolean turned;
         int count = 0;
-        List<Guard> newPositions = new ArrayList<>();
+        List<Guard> blockPositions = new ArrayList<>();
         while (true) {
             oldGuard.y = guard.y;
             oldGuard.x = guard.x;
@@ -72,13 +74,13 @@ public class Main {
                 Guard oldGhostCopy = new Guard(oldGuard.x, oldGuard.y, oldGuard.moveDirection);
                 ghost.changeDirection();
                 ghost.move();
+                int steps = 0;
                 while (ghost.x != oldGuard.x || ghost.y != oldGuard.y) {
+                    if (steps > maxSteps)
+                        break;
                     if (ghost.x < 0 || ghost.x >= field.getFirst().length ||
                             ghost.y < 0 || ghost.y >= field.size())
                         break;
-                    if (visitedCopy[ghost.y][ghost.x] == '+')
-                        break;
-
 
                     if (field.get(ghost.y)[ghost.x] == '#') {
                         ghost.y = oldGhostCopy.y;
@@ -86,36 +88,20 @@ public class Main {
                         ghost.changeDirection();
                     }
                     else {
-                        if (visitedCopy[ghost.y][ghost.x] == '.')
-                            visitedCopy[ghost.y][ghost.x] = ghost.getMoveChar();
-                        else if (visitedCopy[ghost.y][ghost.x] == 'r' &&
-                                (ghost.moveDirection.equals("down") || ghost.moveDirection.equals("up")))
-                            visitedCopy[ghost.y][ghost.x] = '+';
-                        else if (visitedCopy[ghost.y][ghost.x] == 'l' &&
-                                (ghost.moveDirection.equals("down") || ghost.moveDirection.equals("up")))
-                            visitedCopy[ghost.y][ghost.x] = '+';
-                        else if (visitedCopy[ghost.y][ghost.x] == 'u' &&
-                                (ghost.moveDirection.equals("right") || ghost.moveDirection.equals("left")))
-                            visitedCopy[ghost.y][ghost.x] = '+';
-                        else if (visitedCopy[ghost.y][ghost.x] == 'd' &&
-                                (ghost.moveDirection.equals("right") || ghost.moveDirection.equals("left")))
-                            visitedCopy[ghost.y][ghost.x] = '+';
-                        else
-                            break;
                         oldGhostCopy.y = ghost.y;
                         oldGhostCopy.x = ghost.x;
                         oldGhostCopy.moveDirection = ghost.moveDirection;
                     }
                     ghost.move();
+                    steps++;
                 }
-                for (char[] chars : visitedCopy) {
-                    Arrays.fill(chars, '.');
-                }
-                if (ghost.x == oldGuard.x && ghost.y == oldGuard.y) {
-                    Guard newLocation = new Guard(guard.x, guard.y, guard.moveDirection);
-                    newPositions.add(newLocation);
-                    count++;
 
+                if (ghost.x == oldGuard.x && ghost.y == oldGuard.y) {
+                    if (!(guard.x == startGuard.x && guard.y == startGuard.y)) {
+                        Guard blockPosition = new Guard(guard.x, guard.y, guard.moveDirection);
+                        blockPositions.add(blockPosition);
+                        count++;
+                    }
                 }
             }
             visited[oldGuard.y][oldGuard.x] = true;
@@ -124,7 +110,7 @@ public class Main {
 
         }
 
-        for (Guard g : newPositions) {
+        for (Guard g : blockPositions) {
             field.get(g.y)[g.x] = 'O';
         }
         drawField(field);
