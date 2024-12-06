@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
 
-public class Main {
+public class TestMain {
 
     public static void main(String[] args) throws FileNotFoundException {
         File inputFile = new File("input-data/day6.txt");
@@ -27,7 +27,9 @@ public class Main {
                     startGuard.x = j;
                     startGuard.y = i;
                 }
+
             }
+
         }
 
         boolean[][] visited = new boolean[field.size()][];
@@ -35,10 +37,9 @@ public class Main {
             visited[i] = new boolean[field.get(i).length];
         }
 
-        long maxSteps = (long) field.size() * field.size();
         boolean turned;
-        int count = 0;
-        List<Guard> blockPositions = new ArrayList<>();
+
+
         while (true) {
             oldGuard.y = guard.y;
             oldGuard.x = guard.x;
@@ -46,15 +47,6 @@ public class Main {
             guard.move();
             if (guard.x < 0 || guard.x >= field.getFirst().length ||
                     guard.y < 0 || guard.y >= field.size()) {
-                if (visited[oldGuard.y][oldGuard.x]) {
-                    field.get(oldGuard.y)[oldGuard.x] = '+';
-//                    field.get(oldGuard.y)[oldGuard.x] = 'X';
-                } else {
-                    field.get(oldGuard.y)[oldGuard.x] = guard.getMoveChar();
-//                    field.get(oldGuard.y)[oldGuard.x] = 'X';
-                }
-                field.get(startGuard.y)[startGuard.x] = '^';
-                drawField(field);
                 break;
             }
             if (field.get(guard.y)[guard.x] == '#') {
@@ -63,59 +55,102 @@ public class Main {
                 guard.changeDirection();
                 turned = true;
             } else {
-                if (visited[oldGuard.y][oldGuard.x]) {
-//                    field.get(oldGuard.y)[oldGuard.x] = '+';
-                    field.get(oldGuard.y)[oldGuard.x] = 'X';
-                } else {
-                    field.get(oldGuard.y)[oldGuard.x] = guard.getMoveChar();
-//                field.get(oldGuard.y)[oldGuard.x] = 'X';
-                }
+                field.get(oldGuard.y)[oldGuard.x] = 'X';
                 turned = false;
             }
             if (!turned) {
-                field.get(guard.y)[guard.x] = guard.lookCorrectSide();
-                Guard ghost = new Guard(oldGuard.x, oldGuard.y, oldGuard.moveDirection);
-                Guard oldGhostCopy = new Guard(oldGuard.x, oldGuard.y, oldGuard.moveDirection);
-                char oldMoveSymbol = field.get(guard.y)[guard.x];
-                ghost.changeDirection();
-                ghost.move();
-                field.get(guard.y)[guard.x] = '#';
-                int steps = 0;
-                while (steps <= maxSteps) {
-                    if (ghost.x < 0 || ghost.x >= field.getFirst().length ||
-                            ghost.y < 0 || ghost.y >= field.size()) {
-                        break;
-                    }
-                    if (field.get(ghost.y)[ghost.x] == '#') {
-                        ghost.y = oldGhostCopy.y;
-                        ghost.x = oldGhostCopy.x;
-                        ghost.changeDirection();
-                    }
-                    else {
-                        oldGhostCopy.y = ghost.y;
-                        oldGhostCopy.x = ghost.x;
-                        oldGhostCopy.moveDirection = ghost.moveDirection;
-                        ghost.move();
-                        steps++;
-                    }
-
-                }
-                field.get(guard.y)[guard.x] = oldMoveSymbol;
-
-                if (steps > maxSteps) {
-                    if (!(guard.x == startGuard.x && guard.y == startGuard.y)) {
-                        Guard blockPosition = new Guard(guard.x, guard.y, guard.moveDirection);
-                        blockPositions.add(blockPosition);
-                        count++;
-                    }
-                }
+                field.get(oldGuard.y)[oldGuard.x] = 'X';
 
             }
-//            visited[oldGuard.y][oldGuard.x] = true;
+            visited[oldGuard.y][oldGuard.x] = true;
 
-//            drawField(field);
 
         }
+        visited[oldGuard.y][oldGuard.x] = true;
+        field.get(oldGuard.y)[oldGuard.x] = 'X';
+//        drawField(field);
+
+        scanner = new Scanner(inputFile);
+        field = new ArrayList<>();
+        while (scanner.hasNextLine()) {
+            field.add(scanner.nextLine().toCharArray());
+        }
+        guard = new Guard();
+        oldGuard = new Guard();
+        // get guard position
+        for (int i = 0; i < field.size(); i++) {
+            for (int j = 0; j < field.get(i).length; j++) {
+                if (field.get(i)[j] == '^') {
+                    guard.x = j;
+                    guard.y = i;
+                    oldGuard.y = i;
+                    oldGuard.x = j;
+                    startGuard.x = j;
+                    startGuard.y = i;
+                }
+            }
+        }
+        long maxSteps = (long) field.size() * field.size();
+        List<Guard> blockPositions = new ArrayList<>();
+        List<Guard> blockSol = new ArrayList<>();
+        for (int i = 0; i < visited.length; i++) {
+            for (int j = 0; j < visited[i].length; j++) {
+                if (visited[i][j])
+                    blockPositions.add(new Guard(j, i, "up"));
+            }
+        }
+        for (Guard block : blockPositions) {
+            scanner = new Scanner(inputFile);
+            field = new ArrayList<>();
+            while (scanner.hasNextLine()) {
+                field.add(scanner.nextLine().toCharArray());
+            }
+            field.get(block.y)[block.x] = 'O';
+//            System.out.println(block);
+//            drawField(field);
+            int steps = 0;
+            int turning = 0;
+            while (steps < maxSteps) {
+                oldGuard.y = guard.y;
+                oldGuard.x = guard.x;
+                oldGuard.moveDirection = guard.moveDirection;
+                guard.move();
+                if (guard.x < 0 || guard.x >= field.getFirst().length ||
+                        guard.y < 0 || guard.y >= field.size() || turning == 5) {
+                    field.get(oldGuard.y)[oldGuard.x] = 'X';
+                    field.get(startGuard.y)[startGuard.x] = '^';
+                    break;
+                }
+                if (field.get(guard.y)[guard.x] == '#' || field.get(guard.y)[guard.x] == 'O') {
+                    guard.x = oldGuard.x;
+                    guard.y = oldGuard.y;
+                    guard.changeDirection();
+                    turning++;
+                } else {
+                    field.get(oldGuard.y)[oldGuard.x] = 'X';
+                    steps++;
+                    turning--;
+
+                }
+                visited[oldGuard.y][oldGuard.x] = true;
+
+            }
+            if (steps >= maxSteps || turning >= 4) {
+                if (!(block.x == startGuard.x && block.y == startGuard.y)) {
+                    Guard blockPosition = new Guard(block.x, block.y, block.moveDirection);
+                    blockSol.add(blockPosition);
+                }
+            }
+            guard.x = startGuard.x;
+            guard.y = startGuard.y;
+            guard.moveDirection = "up";
+            oldGuard.y = startGuard.y;
+            oldGuard.x = startGuard.x;
+            oldGuard.moveDirection = "up";
+//            drawField(field);
+        }
+
+
         int count2 = 0;
         for (char[] chars : field) {
             for (char c : chars)
@@ -123,13 +158,20 @@ public class Main {
                     count2++;
         }
         field.get(startGuard.y)[startGuard.x] = '^';
-        for (Guard g : blockPositions) {
+        for (Guard g : blockSol) {
             field.get(g.y)[g.x] = 'O';
         }
-        drawField(field);
+//        drawField(field);
 
         System.out.println(count2);
-        System.out.println(new HashSet<>(blockPositions).size());
+        System.out.println(new HashSet<>(blockSol).size());
+        System.out.println("----------------------");
+        for (int i = 0; i < visited.length; i++) {
+            for (int j = 0; j < visited[i].length; j++) {
+//                System.out.print(visited[i][j]+",");
+            }
+//            System.out.println();
+        }
 
     }
 
@@ -231,7 +273,8 @@ public class Main {
                         'X';
             };
         }
-        public char getShortMoveChar(){
+
+        public char getShortMoveChar() {
             if (this.moveDirection.equals("up") || this.moveDirection.equals("down"))
                 return '|';
             if (this.moveDirection.equals("right") || this.moveDirection.equals("left"))
