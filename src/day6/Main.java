@@ -17,60 +17,110 @@ public class Main {
             field.add(scanner.nextLine().toCharArray());
         }
         Guard guard = new Guard();
+        Guard oldGuard = new Guard();
         // get guard position
         for (int i = 0; i < field.size(); i++) {
             for (int j = 0; j < field.get(i).length; j++) {
                 if (field.get(i)[j] == '^') {
                     guard.x = j;
                     guard.y = i;
-                    Guard.oldPos.y = i;
-                    Guard.oldPos.x = j;
+                    oldGuard.y = i;
+                    oldGuard.x = j;
                 }
             }
         }
         boolean[][] visited = new boolean[field.size()][field.size()];
+        char[][] visitedCopy = new char[field.size()][field.size()];
         boolean turned = false;
+        int count = 0;
         List<Guard> newPositions = new ArrayList<>();
         while (true) {
-            guard.move(true);
+            oldGuard.y = guard.y;
+            oldGuard.x = guard.x;
+            oldGuard.moveDirection = guard.moveDirection;
+            guard.move();
             if (guard.x < 0 || guard.x >= field.getFirst().length ||
                     guard.y < 0 || guard.y >= field.size()) {
-                if (visited[Guard.oldPos.y][Guard.oldPos.x]) {
-                    field.get(Guard.oldPos.y)[Guard.oldPos.x] = '+';
+                if (visited[oldGuard.y][oldGuard.x]) {
+                    field.get(oldGuard.y)[oldGuard.x] = '+';
                 } else {
-                    field.get(Guard.oldPos.y)[Guard.oldPos.x] = guard.getMoveChar();
+                    field.get(oldGuard.y)[oldGuard.x] = guard.getMoveChar();
                 }
                 drawField(field);
                 break;
             }
             if (field.get(guard.y)[guard.x] == '#') {
-                guard.resetMove();
+                guard.x = oldGuard.x;
+                guard.y = oldGuard.y;
                 guard.changeDirection();
                 turned = true;
             } else {
-                if (visited[Guard.oldPos.y][Guard.oldPos.x]) {
-                    field.get(Guard.oldPos.y)[Guard.oldPos.x] = '+';
+                if (visited[oldGuard.y][oldGuard.x]) {
+                    field.get(oldGuard.y)[oldGuard.x] = '+';
                 } else {
-                    field.get(Guard.oldPos.y)[Guard.oldPos.x] = guard.getMoveChar();
-//                field.get(Guard.oldPos.y)[Guard.oldPos.x] = 'X';
+                    field.get(oldGuard.y)[oldGuard.x] = guard.getMoveChar();
+//                field.get(oldGuard.y)[oldGuard.x] = 'X';
                 }
                 turned = false;
             }
             if (!turned) {
                 field.get(guard.y)[guard.x] = guard.lookCorrectSide();
-                Guard copy = new Guard(guard.x, guard.y, guard.moveDirection);
+                Guard copy = new Guard(oldGuard.x, oldGuard.y, oldGuard.moveDirection);
+                Guard oldGuardCopy = new Guard(oldGuard.x, oldGuard.y, oldGuard.moveDirection);
                 copy.changeDirection();
-                copy.move(false);
-                if (copy.checkSides(field)) {
+                copy.move();
+                while (copy.x != oldGuard.x || copy.y != oldGuard.y) {
+                    if (copy.x < 0 || copy.x >= field.getFirst().length ||
+                            copy.y < 0 || copy.y >= field.size())
+                        break;
+                    if (visitedCopy[copy.y][copy.x] == '+')
+                        break;
+
+                    if (visitedCopy[copy.y][copy.x] == '.')
+                        visitedCopy[copy.y][copy.x] = copy.getMoveChar();
+                    else if (visitedCopy[copy.y][copy.x] == 'r' &&
+                            (copy.moveDirection.equals("down") || copy.moveDirection.equals("up")))
+                        visitedCopy[copy.y][copy.x] = '+';
+                    else if (visitedCopy[copy.y][copy.x] == 'l' &&
+                            (copy.moveDirection.equals("down") || copy.moveDirection.equals("up")))
+                        visitedCopy[copy.y][copy.x] = '+';
+                    else if (visitedCopy[copy.y][copy.x] == 'u' &&
+                            (copy.moveDirection.equals("right") || copy.moveDirection.equals("left")))
+                        visitedCopy[copy.y][copy.x] = '+';
+                    else if (visitedCopy[copy.y][copy.x] == 'd' &&
+                            (copy.moveDirection.equals("right") || copy.moveDirection.equals("left")))
+                        visitedCopy[copy.y][copy.x] = '+';
+                    else
+                        break;
+
+
+                    if (field.get(copy.y)[copy.x] == '#') {
+                        copy.y = oldGuardCopy.y;
+                        copy.x = oldGuardCopy.x;
+                        copy.changeDirection();
+                    }
+                    else {
+                        oldGuardCopy.y = copy.y;
+                        oldGuardCopy.x = copy.x;
+                        oldGuardCopy.moveDirection = copy.moveDirection;
+                    }
+                    copy.move();
+
+                }
+                for (char[] chars : visitedCopy) {
+                    Arrays.fill(chars, '.');
+                }
+                if (copy.x == oldGuard.x && copy.y == oldGuard.y) {
                     Guard newLocation = new Guard(guard.x, guard.y, guard.moveDirection);
-                    newLocation.move(false);
                     newPositions.add(newLocation);
+                    count++;
+
                 }
 
             }
-            visited[Guard.oldPos.y][Guard.oldPos.x] = true;
+            visited[oldGuard.y][oldGuard.x] = true;
 
-            drawField(field);
+//            drawField(field);
 
         }
 
@@ -83,8 +133,8 @@ public class Main {
         for (Guard g : newPositions) {
             field.get(g.y)[g.x] = 'O';
         }
-//        drawField(field);
-        System.out.println(newPositions.size());
+        drawField(field);
+        System.out.println(count);
 
     }
 
@@ -99,7 +149,6 @@ public class Main {
         private int x = 0;
         private int y = 0;
         private String moveDirection = "up";
-        private static final Guard oldPos = new Guard();
 
         public Guard(int x, int y, String moveDirection) {
             this.x = x;
@@ -118,37 +167,20 @@ public class Main {
                     '}';
         }
 
-        public void move(boolean moveOldPos) {
+
+        public void move() {
             if (this.moveDirection.equals("up")) {
-                if (moveOldPos)
-                    copyPosToOldPos();
                 y -= 1;
             }
             if (this.moveDirection.equals("right")) {
-                if (moveOldPos)
-                    copyPosToOldPos();
                 x += 1;
             }
             if (this.moveDirection.equals("down")) {
-                if (moveOldPos)
-                    copyPosToOldPos();
                 y += 1;
             }
             if (this.moveDirection.equals("left")) {
-                if (moveOldPos)
-                    copyPosToOldPos();
                 x -= 1;
             }
-        }
-
-        private void copyPosToOldPos() {
-            oldPos.x = this.x;
-            oldPos.y = this.y;
-        }
-
-        public void resetMove() {
-            this.x = oldPos.x;
-            this.y = oldPos.y;
         }
 
         public void changeDirection() {
@@ -190,6 +222,14 @@ public class Main {
                     // should not happen
                         'X';
             };
+        }
+        public char getShortMoveChar(){
+            if (this.moveDirection.equals("up") || this.moveDirection.equals("down"))
+                return '|';
+            if (this.moveDirection.equals("right") || this.moveDirection.equals("left"))
+                return '-';
+            // should not happen
+            return 'X';
         }
 
         public boolean checkSides(List<char[]> field) {
