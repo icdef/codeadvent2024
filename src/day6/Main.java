@@ -79,8 +79,6 @@ public class Main {
                 field.get(guard.y)[guard.x] = '#';
                 int steps = 0;
                 while (steps <= maxSteps) {
-//                    if (steps > maxSteps)
-//                        break;
                     if (ghost.x < 0 || ghost.x >= field.getFirst().length ||
                             ghost.y < 0 || ghost.y >= field.size()) {
                         break;
@@ -137,6 +135,19 @@ public class Main {
         private int x = 0;
         private int y = 0;
         private String moveDirection = "up";
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Guard guard = (Guard) o;
+            return x == guard.x && y == guard.y;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(x, y);
+        }
 
         public Guard(int x, int y, String moveDirection) {
             this.x = x;
