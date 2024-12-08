@@ -39,8 +39,8 @@ public class Main {
 
         boolean plus = rec(current + operators[index], operators, index + 1, target);
         boolean times = rec(current * operators[index], operators, index + 1, target);
-        boolean concat = rec(Long.parseLong("" + current + operators[index]), operators, index + 1, target);
-
+        long concatNumber = (long) (current * Math.pow(10, Math.floor(Math.log10(operators[index])) + 1) + operators[index]);
+        boolean concat = rec(concatNumber, operators, index + 1, target);
         return plus || times || concat;
     }
 }
