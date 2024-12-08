@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
 
-public class TestMain {
+public class Main {
 
     public static void main(String[] args) throws FileNotFoundException {
         File inputFile = new File("input-data/day6.txt");
@@ -13,13 +13,14 @@ public class TestMain {
         while (scanner.hasNextLine()) {
             field.add(scanner.nextLine().toCharArray());
         }
+        List<char[]> copyField = copyField(field);
         Guard guard = new Guard();
         Guard oldGuard = new Guard();
         Guard startGuard = new Guard();
         // get guard position
-        for (int i = 0; i < field.size(); i++) {
-            for (int j = 0; j < field.get(i).length; j++) {
-                if (field.get(i)[j] == '^') {
+        for (int i = 0; i < copyField.size(); i++) {
+            for (int j = 0; j < copyField.get(i).length; j++) {
+                if (copyField.get(i)[j] == '^') {
                     guard.x = j;
                     guard.y = i;
                     oldGuard.y = i;
@@ -32,9 +33,9 @@ public class TestMain {
 
         }
 
-        boolean[][] visited = new boolean[field.size()][];
+        boolean[][] visited = new boolean[copyField.size()][];
         for (int i = 0; i < visited.length; i++) {
-            visited[i] = new boolean[field.get(i).length];
+            visited[i] = new boolean[copyField.get(i).length];
         }
 
         boolean turned;
@@ -45,21 +46,21 @@ public class TestMain {
             oldGuard.x = guard.x;
             oldGuard.moveDirection = guard.moveDirection;
             guard.move();
-            if (guard.x < 0 || guard.x >= field.getFirst().length ||
-                    guard.y < 0 || guard.y >= field.size()) {
+            if (guard.x < 0 || guard.x >= copyField.getFirst().length ||
+                    guard.y < 0 || guard.y >= copyField.size()) {
                 break;
             }
-            if (field.get(guard.y)[guard.x] == '#') {
+            if (copyField.get(guard.y)[guard.x] == '#') {
                 guard.x = oldGuard.x;
                 guard.y = oldGuard.y;
                 guard.changeDirection();
                 turned = true;
             } else {
-                field.get(oldGuard.y)[oldGuard.x] = 'X';
+                copyField.get(oldGuard.y)[oldGuard.x] = 'X';
                 turned = false;
             }
             if (!turned) {
-                field.get(oldGuard.y)[oldGuard.x] = 'X';
+                copyField.get(oldGuard.y)[oldGuard.x] = 'X';
 
             }
             visited[oldGuard.y][oldGuard.x] = true;
@@ -67,20 +68,16 @@ public class TestMain {
 
         }
         visited[oldGuard.y][oldGuard.x] = true;
-        field.get(oldGuard.y)[oldGuard.x] = 'X';
-//        drawField(field);
+        copyField.get(oldGuard.y)[oldGuard.x] = 'X';
+//        drawField(copyField);
 
-        scanner = new Scanner(inputFile);
-        field = new ArrayList<>();
-        while (scanner.hasNextLine()) {
-            field.add(scanner.nextLine().toCharArray());
-        }
+        copyField = copyField(field);
         guard = new Guard();
         oldGuard = new Guard();
         // get guard position
-        for (int i = 0; i < field.size(); i++) {
-            for (int j = 0; j < field.get(i).length; j++) {
-                if (field.get(i)[j] == '^') {
+        for (int i = 0; i < copyField.size(); i++) {
+            for (int j = 0; j < copyField.get(i).length; j++) {
+                if (copyField.get(i)[j] == '^') {
                     guard.x = j;
                     guard.y = i;
                     oldGuard.y = i;
@@ -90,7 +87,7 @@ public class TestMain {
                 }
             }
         }
-        long maxSteps = (long) field.size() * field.size();
+        long maxSteps = (long) copyField.size() * copyField.size();
         List<Guard> blockPositions = new ArrayList<>();
         List<Guard> blockSol = new ArrayList<>();
         for (int i = 0; i < visited.length; i++) {
@@ -100,14 +97,10 @@ public class TestMain {
             }
         }
         for (Guard block : blockPositions) {
-            scanner = new Scanner(inputFile);
-            field = new ArrayList<>();
-            while (scanner.hasNextLine()) {
-                field.add(scanner.nextLine().toCharArray());
-            }
-            field.get(block.y)[block.x] = 'O';
+            copyField = copyField(field);
+            copyField.get(block.y)[block.x] = 'O';
 //            System.out.println(block);
-//            drawField(field);
+//            drawField(copyField);
             int steps = 0;
             int turning = 0;
             while (steps < maxSteps) {
@@ -115,19 +108,19 @@ public class TestMain {
                 oldGuard.x = guard.x;
                 oldGuard.moveDirection = guard.moveDirection;
                 guard.move();
-                if (guard.x < 0 || guard.x >= field.getFirst().length ||
-                        guard.y < 0 || guard.y >= field.size() || turning == 5) {
-                    field.get(oldGuard.y)[oldGuard.x] = 'X';
-                    field.get(startGuard.y)[startGuard.x] = '^';
+                if (guard.x < 0 || guard.x >= copyField.getFirst().length ||
+                        guard.y < 0 || guard.y >= copyField.size() || turning == 5) {
+                    copyField.get(oldGuard.y)[oldGuard.x] = 'X';
+                    copyField.get(startGuard.y)[startGuard.x] = '^';
                     break;
                 }
-                if (field.get(guard.y)[guard.x] == '#' || field.get(guard.y)[guard.x] == 'O') {
+                if (copyField.get(guard.y)[guard.x] == '#' || copyField.get(guard.y)[guard.x] == 'O') {
                     guard.x = oldGuard.x;
                     guard.y = oldGuard.y;
                     guard.changeDirection();
                     turning++;
                 } else {
-                    field.get(oldGuard.y)[oldGuard.x] = 'X';
+                    copyField.get(oldGuard.y)[oldGuard.x] = 'X';
                     steps++;
                     turning--;
 
@@ -147,32 +140,20 @@ public class TestMain {
             oldGuard.y = startGuard.y;
             oldGuard.x = startGuard.x;
             oldGuard.moveDirection = "up";
-//            drawField(field);
+//            drawField(copyField);
         }
 
 
-        int count2 = 0;
-        for (char[] chars : field) {
-            for (char c : chars)
-                if (c == '#')
-                    count2++;
-        }
-        field.get(startGuard.y)[startGuard.x] = '^';
-        for (Guard g : blockSol) {
-            field.get(g.y)[g.x] = 'O';
-        }
-//        drawField(field);
-
-        System.out.println(count2);
         System.out.println(new HashSet<>(blockSol).size());
-        System.out.println("----------------------");
-        for (int i = 0; i < visited.length; i++) {
-            for (int j = 0; j < visited[i].length; j++) {
-//                System.out.print(visited[i][j]+",");
-            }
-//            System.out.println();
-        }
 
+    }
+
+    private static List<char[]> copyField(List<char[]> field) {
+        List<char[]> copyField = new ArrayList<>();
+        for (char[] chars : field) {
+            copyField.add(Arrays.copyOf(chars, chars.length));
+        }
+        return copyField;
     }
 
     private static void drawField(List<char[]> field) {
@@ -248,53 +229,6 @@ public class TestMain {
                     this.moveDirection = "up";
                     break;
             }
-        }
-
-        public char getMoveChar() {
-            return switch (this.moveDirection) {
-                case "up" -> 'u';
-                case "right" -> 'r';
-                case "down" -> 'd';
-                case "left" -> 'l';
-                default ->
-                    // should not happen
-                        'X';
-            };
-        }
-
-        public char lookCorrectSide() {
-            return switch (this.moveDirection) {
-                case "up" -> 'r';
-                case "right" -> 'd';
-                case "down" -> 'l';
-                case "left" -> 'u';
-                default ->
-                    // should not happen
-                        'X';
-            };
-        }
-
-        public char getShortMoveChar() {
-            if (this.moveDirection.equals("up") || this.moveDirection.equals("down"))
-                return '|';
-            if (this.moveDirection.equals("right") || this.moveDirection.equals("left"))
-                return '-';
-            // should not happen
-            return 'X';
-        }
-
-        public boolean checkSides(List<char[]> field) {
-            if (field.get(this.y)[this.x] == '+')
-                return true;
-            return switch (this.moveDirection) {
-                case "up" -> field.get(this.y)[this.x] == 'u';
-                case "down" -> field.get(this.y)[this.x] == 'd';
-                case "right" -> field.get(this.y)[this.x] == 'r';
-                case "left" -> field.get(this.y)[this.x] == 'l';
-                default ->
-                    // should not happen
-                        field.get(this.y)[this.x] == 'X';
-            };
         }
     }
 }
