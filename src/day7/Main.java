@@ -23,13 +23,14 @@ public class Main {
             for (int i = 0; i < operators.length; i++) {
                 operators[i] = Integer.parseInt(operatorSplit[i]);
             }
-            boolean possible = rec(0, operators, 0, result);
+            boolean possible = rec(operators[0], operators, 1, result);
             if (possible) {
                 sum += result;
             }
 
         }
         System.out.println(sum);
+
     }
 
     public static boolean rec(long current, int[] operators, int index, long target) {
