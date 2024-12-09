@@ -10,11 +10,12 @@ import java.util.Scanner;
 public class Main {
 
     /* possible speed up using memoization
-        I can save for each block size I have to add, the index of the last place I added such a block size
-        e.g. I need to add block size 18 for the 2nd time and the first time I added one was at index 52.
+        For each block size I have to add, the index of the last place I added such a block size or smaller can be used
+        as starting point.
+        e.g. I need to add block size 18 and I added a block with size 17 at index 52.
         There is no reason for me to start looking from index 0, since I know that the last time the first free place
-        for such a block size was at index 52. So I look in my memoization array (index 18 value 70 (52+18))
-        and use it as start index for my look-up for the second size 18 block. Works here since we use fit first and not
+        for a even smaller block size was at index 52. So I look in my memoization array get the end index of block 17
+        and use it as start index for my look-up for the size 18 block. Works here since we use fit first and not
         fit-best
      */
 
