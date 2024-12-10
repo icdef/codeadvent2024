@@ -24,10 +24,14 @@ public class Main {
                     zeros.add(new Coord(j, i));
             }
         }
+//        part 1
+//        for (Coord coord : zeros) {
+//            Set<Coord> nines = new HashSet<>();
+//            rec(field, new Coord(coord.x, coord.y), nines);
+//            sum += nines.size();
+//        }
         for (Coord coord : zeros) {
-            Set<Coord> nines = new HashSet<>();
-            rec(field, new Coord(coord.x, coord.y), nines);
-            sum += nines.size();
+            sum += rec2(field, new Coord(coord.x, coord.y));
         }
         System.out.println(sum);
 
@@ -68,6 +72,46 @@ public class Main {
         if (isDownPossible) {
             rec(field, new Coord(currentPos.x, currentPos.y - 1), nines);
         }
+    }
+
+    private static int rec2(List<char[]> field, Coord currentPos) {
+        char c = field.get(currentPos.y)[currentPos.x];
+        int right = 0;
+        int left = 0;
+        int down = 0;
+        int up = 0;
+        if (field.get(currentPos.y)[currentPos.x] == '9') {
+            return 1;
+        }
+
+        boolean isRightPossible = currentPos.x + 1 < field.get(currentPos.y).length &&
+                field.get(currentPos.y)[currentPos.x + 1] - field.get(currentPos.y)[currentPos.x] == 1;
+        boolean isLeftPossible = currentPos.x - 1 >= 0 &&
+                field.get(currentPos.y)[currentPos.x - 1] - field.get(currentPos.y)[currentPos.x] == 1;
+        boolean isUpPossible = currentPos.y + 1 < field.size() &&
+                field.get(currentPos.y + 1)[currentPos.x] - field.get(currentPos.y)[currentPos.x] == 1;
+        boolean isDownPossible = currentPos.y - 1 >= 0 &&
+                field.get(currentPos.y - 1)[currentPos.x] - field.get(currentPos.y)[currentPos.x] == 1;
+        if (!isRightPossible && !isLeftPossible && !isDownPossible && !isUpPossible) {
+            return 0;
+        }
+        // go right
+        if (isRightPossible) {
+            right = rec2(field, new Coord(currentPos.x + 1, currentPos.y));
+        }
+        // go left
+        if (isLeftPossible) {
+            left = rec2(field, new Coord(currentPos.x - 1, currentPos.y));
+        }
+        // go down
+        if (isUpPossible) {
+            down = rec2(field, new Coord(currentPos.x, currentPos.y + 1));
+        }
+        // go up
+        if (isDownPossible) {
+            up = rec2(field, new Coord(currentPos.x, currentPos.y - 1));
+        }
+        return left + right + down + up;
     }
 
 
