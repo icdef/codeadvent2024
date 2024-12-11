@@ -25,12 +25,11 @@ public class Main {
             for (Map.Entry<Long, List<Long>> tr : transformationMapAll.entrySet()) {
                 if (transformationCount.containsKey(tr.getKey())) {
                     for (int j = 0; j < transformationCount.get(tr.getKey()); j++) {
+                        // Ich hab ja da schon die stones die ich brauche. Vielleicht geht es so, weil ich darf die liste net erstellen => OUt of heap
                         stones.addAll(transformationMapAll.get(tr.getKey()));
                     }
                 }
             }
-//            System.out.println(stones);
-
         }
 
         long sum = 0;
@@ -39,13 +38,7 @@ public class Main {
             sum += tr.getValue() * transformationMapAll.get(tr.getKey()).size();
         }
         System.out.println(sum);
-        System.out.println("---");
-        for (Map.Entry<Long, List<Long>> tr : transformationMapAll.entrySet()) {
-//            System.out.println(tr);
-        }
 
-//        System.out.println(stones.size());
-        //        part1(stones);
     }
 
     private static void transform(long stone, Map<Long, List<Long>> transformationMap,
